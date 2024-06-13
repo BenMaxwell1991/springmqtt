@@ -12,7 +12,11 @@ public class MqttPublisherService {
     private MessageChannel mqttOutboundChannel;
 
     public void publish(String message) {
-        mqttOutboundChannel.send(MessageBuilder.withPayload(message).build());
+        publish("yourTopic", message);
+    }
+
+    public void publish(String topic, String message) {
+        mqttOutboundChannel.send(MessageBuilder.withPayload(message).setHeader("mqtt_topic", topic).build());
     }
 
 }

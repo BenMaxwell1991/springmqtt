@@ -1,9 +1,12 @@
 package com.maxwell.example.config;
 
+import com.maxwell.example.service.MqttPublisherService;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
@@ -25,6 +28,15 @@ public class MqttConfig {
 
     @Value("${mqtt.topic}")
     private String topic;
+
+    @Value("${mqtt.reply.topic}")
+    private String replyTopic;
+
+    private final MqttPublisherService mqttPublisherService;
+
+    public MqttConfig(@Lazy MqttPublisherService mqttPublisherService) {
+        this.mqttPublisherService = mqttPublisherService;
+    }
 
     @Bean
     public MqttConnectOptions mqttConnectOptions() {
@@ -57,8 +69,22 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
+
+        int x = 0;
+
         return message -> {
-            System.out.println("Received message: " + message.getPayload());
+
+            String payload = (String) message.getPayload();
+            System.out.println("Received message: " + payload);
+
+            // If it starts with Request, lets give a response
+            if (payload.startsWith("Request:")) {
+
+                String replyMessage = "Reply to " + payload;
+                mqttPublisherService.publish(replyTopic, replyMessage);
+                System.out.println("Reply sent: " + replyMessage);
+
+            }
         };
     }
 

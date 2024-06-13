@@ -69,9 +69,6 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler handler() {
-
-        int x = 0;
-
         return message -> {
 
             String payload = (String) message.getPayload();
@@ -79,12 +76,11 @@ public class MqttConfig {
 
             // If it starts with Request, lets give a response
             if (payload.startsWith("Request:")) {
-
                 String replyMessage = "Reply to " + payload;
                 mqttPublisherService.publish(replyTopic, replyMessage);
                 System.out.println("Reply sent: " + replyMessage);
-
             }
+
         };
     }
 

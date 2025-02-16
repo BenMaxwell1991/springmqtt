@@ -17,6 +17,7 @@ public class MqttTestRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // Update comment
         String requestMessage = "Request: Test message from Spring Boot";
         mqttPublisherService.publish(topic, requestMessage);
         System.out.println("Request message published: " + requestMessage);
